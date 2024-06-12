@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WoW Token Price Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>WoW Token Price Tracker</h1>
+    <form id="tokenForm">
+        <label for="server">Servidor:</label>
+        <select id="server" name="server">
+            <option value="KR">KR</option>
+            <option value="USA">USA</option>
+            <option value="EU">EU</option>
+        </select>
+        <label for="gameType">Tipo de Juego:</label>
+        <select id="gameType" name="gameType">
+            <option value="classic">Classic</option>
+            <option value="retail">Retail</option>
+        </select>
+        <label for="timeRange">Rango de Tiempo:</label>
+        <select id="timeRange" name="timeRange">
+            <option value="3d">3 días</option>
+            <option value="7d">7 días</option>
+            <option value="14d">14 días</option>
+            <option value="1m">1 mes</option>
+            <option value="3m">3 meses</option>
+            <option value="all">Todo el rango</option>
+        </select>
+    </form>
+    <canvas id="tokenChart" width="400" height="200"></canvas>
+    <script src="script.js"></script>
+</body>
+</html>
