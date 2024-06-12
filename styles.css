@@ -1,0 +1,60 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+.container {
+    width: 80%;
+    max-width: 800px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.chart-container {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative; /* Añadido */
+    height: 300px; /* Altura inicial del gráfico */
+}
+
+form {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+form label,
+form select {
+    margin-bottom: 10px;
+}
+
+canvas {
+    width: 100%;
+    height: 100%; /* Modificado */
+    display: block; /* Añadido */
+}
+
+/* Nuevas reglas para adaptar el gráfico al tamaño del contenedor */
+@media (max-width: 600px) {
+    .chart-container {
+        height: 200px; /* Reducir la altura para pantallas más pequeñas */
+    }
+}
