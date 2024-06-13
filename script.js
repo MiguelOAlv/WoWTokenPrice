@@ -1,5 +1,3 @@
-// script.js
-
 document.addEventListener('DOMContentLoaded', function () {
     const clientId = '07a2cd4275a54b88a56f5e8081fd8935';
     const clientSecret = '7SvzaPEDoTfTvZGrMEflxfDUIqMfpdFA';
@@ -64,29 +62,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 region = 'us';
         }
 
-        let historyUrl;
-        switch (timeRange) {
-            case '3d':
-                historyUrl = `https://data.wowtoken.app/classic/token/history/${region}/72h.json`;
-                break;
-            case '7d':
-                historyUrl = `https://data.wowtoken.app/classic/token/history/${region}/168h.json`;
-                break;
-            case '14d':
-                historyUrl = `https://data.wowtoken.app/classic/token/history/${region}/336h.json`;
-                break;
-            case '1m':
-                historyUrl = `https://data.wowtoken.app/classic/token/history/${region}/720h.json`;
-                break;
-            case '3m':
-                historyUrl = `https://data.wowtoken.app/classic/token/history/${region}/90d.json`;
-                break;
-            case 'all':
-                historyUrl = `https://data.wowtoken.app/classic/token/history/${region}/all.json`;
-                break;
-            default:
-                historyUrl = `https://data.wowtoken.app/classic/token/history/${region}/72h.json`; // Default to 3 days
-        }
+        const timeRangeMap = {
+            '3d': '72h',
+            '7d': '168h',
+            '14d': '336h',
+            '1m': '720h',
+            '3m': '90d',
+            'all': 'all'
+        };
+
+        const range = timeRangeMap[timeRange] || '72h';
+        const baseUrl = gameType === 'retail' ? 'https://data.wowtoken.app/token/history' : 'https://data.wowtoken.app/classic/token/history';
+        const historyUrl = `${baseUrl}/${region}/${range}.json`;
 
         try {
             const response = await fetch(historyUrl);
@@ -94,26 +81,59 @@ document.addEventListener('DOMContentLoaded', function () {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
             const tokenData = await response.json();
+            
+            const tokenPrices = processTokenData(tokenData);
 
-            const tokenPrices = processTokenData(tokenData, timeRange);
+            // Update the price span with the latest price
+            updatePriceSpan(tokenPrices.data[tokenPrices.data.length - 1]);
+
+            // Update the chart with the new data
             createOrUpdateChart(tokenPrices);
         } catch (error) {
             console.error('Error fetching token data:', error);
         }
     }
 
-    function processTokenData(tokenData, timeRange) {
+    function processTokenData(tokenData) {
         let labels = [];
         let data = [];
-
-        // Parse the tokenData and extract necessary information
+    
         if (Array.isArray(tokenData)) {
             tokenData.forEach(entry => {
-                labels.push(entry.timestamp); // Assuming timestamp is available
-                data.push(entry.price); // Assuming price is available
+                if (entry.time && entry.value) {
+                    const date = new Date(entry.time); // Convertir el timestamp ISO 8601 a objeto Date
+    
+                    // Función para obtener el nombre abreviado del mes
+                    function getShortMonthName(date) {
+                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        return months[date.getMonth()];
+                    }
+    
+                    // Función para obtener el formato deseado de la fecha
+                    function getFormattedDate(date) {
+                        const day = date.getDate();
+                        const monthName = getShortMonthName(date);
+                        const year = date.getFullYear(); // Obtener el año
+    
+                        // Determinar si se debe mostrar el año basado en el rango de tiempo
+                        const currentDate = new Date();
+                        const currentYear = currentDate.getFullYear();
+                        if (year === currentYear || year === currentYear - 1) {
+                            return `${monthName} ${day}`;
+                        } else {
+                            return `${monthName} ${day} ${year}`;
+                        }
+                    }
+    
+                    const formattedDate = getFormattedDate(date); // Obtener la fecha formateada
+    
+                    labels.push(formattedDate); // Agregar la fecha formateada al arreglo de etiquetas
+                    data.push(entry.value); // Agregar el valor al arreglo de datos
+                }
             });
         }
-
+    
         return { labels, data };
     }
 
@@ -146,6 +166,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Initialize the chart with default values
+    function updatePriceSpan(price) {
+        if (price !== undefined) {
+            document.getElementById('precio').textContent = price.toLocaleString(); // Formatear el precio con separadores de miles
+        } else {
+            document.getElementById('precio').textContent = 'N/A';
+        }
+    }
+
+    // Initialize with default values
     updateFormValues();
 });
