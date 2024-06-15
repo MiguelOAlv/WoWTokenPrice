@@ -5,11 +5,10 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    overflow: hidden; 
 }
 
 header {
-    margin: 20px 0px;
+    margin: auto;
     color: #fff;
     text-align: center;
     justify-content: center;
@@ -126,7 +125,7 @@ footer {
     text-align: center;
     padding: 10px 0;
     width: 100%;
-    position: fixed;
+    position: relative;
     bottom: 0;
     left: 0;
     z-index: 1000; 
@@ -159,11 +158,17 @@ footer {
 
 .footer-content a:hover {
     transition: 0.5s;
-    color: #FFD700;
+    color: rgba(75, 192, 192, 1);
 }
 
 img {
     border-radius: 50%;
 }
 
-
+#dataToken {
+    border-radius:10px;
+    box-shadow:#202020;
+    position: absolute;
+    display: none;
+    z-index:1000;
+}

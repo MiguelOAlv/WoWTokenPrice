@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!accessToken) {
             accessToken = await getAccessToken(clientId, clientSecret);
         }
-
+        
         fetchTokenData(formValues.server, formValues.gameType, formValues.timeRange, accessToken);
     }
 
@@ -84,11 +84,9 @@ document.addEventListener('DOMContentLoaded', function () {
             
             const tokenPrices = processTokenData(tokenData);
 
-            // Update the price span with the latest price
             updatePriceSpan(tokenPrices.data[tokenPrices.data.length - 1]);
 
-            // Update the chart with the new data
-            createOrUpdateChart(tokenPrices);
+            createOrUpdateChart(tokenPrices, region);
         } catch (error) {
             console.error('Error fetching token data:', error);
         }
@@ -99,81 +97,208 @@ document.addEventListener('DOMContentLoaded', function () {
         let data = [];
     
         if (Array.isArray(tokenData)) {
-            tokenData.forEach(entry => {
-                if (entry.time && entry.value) {
-                    const date = new Date(entry.time); // Convertir el timestamp ISO 8601 a objeto Date
+            tokenData.forEach((entry, index) => {
+                if (index % 3 === 0) { //Añadir un dato de cada 3
+                    if (entry.time && entry.value) {
+                        const date = new Date(entry.time);
     
-                    // Función para obtener el nombre abreviado del mes
-                    function getShortMonthName(date) {
-                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        return months[date.getMonth()];
-                    }
-    
-                    // Función para obtener el formato deseado de la fecha
-                    function getFormattedDate(date) {
-                        const day = date.getDate();
-                        const monthName = getShortMonthName(date);
-                        const year = date.getFullYear(); // Obtener el año
-    
-                        // Determinar si se debe mostrar el año basado en el rango de tiempo
-                        const currentDate = new Date();
-                        const currentYear = currentDate.getFullYear();
-                        if (year === currentYear || year === currentYear - 1) {
-                            return `${monthName} ${day}`;
-                        } else {
-                            return `${monthName} ${day} ${year}`;
+                        function getShortMonthName(date) {
+                            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                                            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            return months[date.getMonth()];
                         }
+    
+                        function getFormattedDate(date) {
+                            const day = date.getDate();
+                            const monthName = getShortMonthName(date);
+                            const year = date.getFullYear();
+    
+                            const currentDate = new Date();
+                            const currentYear = currentDate.getFullYear();
+                            if (year === currentYear || year === currentYear - 1) {
+                                return `${monthName} ${day}`;
+                            } else {
+                                return `${monthName} ${day} ${year}`;
+                            }
+                        }
+    
+                        const formattedDate = getFormattedDate(date);
+    
+                        labels.push(formattedDate);
+                        data.push({ x: date, y: entry.value });
                     }
-    
-                    const formattedDate = getFormattedDate(date); // Obtener la fecha formateada
-    
-                    labels.push(formattedDate); // Agregar la fecha formateada al arreglo de etiquetas
-                    data.push(entry.value); // Agregar el valor al arreglo de datos
                 }
             });
         }
     
+    
         return { labels, data };
     }
 
-    function createOrUpdateChart(tokenPrices) {
+    function createOrUpdateChart(tokenPrices, region) {
         const ctx = document.getElementById('tokenChart').getContext('2d');
         if (chart) {
             chart.destroy();
         }
+
+        const timeUnit = getTimeUnit(formValues.timeRange);
+        const minDate = tokenPrices.data.length > 0 ? tokenPrices.data[0].x : null;
+        const maxDate = tokenPrices.data.length > 0 ? tokenPrices.data[tokenPrices.data.length - 1].x : null;
+        const regionLabelMap = {
+            'us': 'USA',
+            'eu': 'EU',
+            'kr': 'KR'
+        };
+        const regionLabel = regionLabelMap[region] || 'Region';
+
         chart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: tokenPrices.labels,
                 datasets: [{
-                    label: 'Token Price',
+                    label: `${regionLabel} Token Price`,
                     data: tokenPrices.data,
                     borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1,
-                    fill: false
+                    fill: false,
+                    pointRadius: 2,
+                    pointHoverRadius: 10
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
                 scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: timeUnit,
+                            tooltipFormat: 'P',
+                            displayFormats: {
+                                day: 'MMM d',
+                                month: 'MMM',
+                                year: 'yyyy'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        },
+                        min: minDate,
+                        max: maxDate,
+                        grid: {
+                            display: true,
+                            color: 'rgba(200, 200, 200, 0.1)',
+                            lineWidth: 1,
+                        }
+                    },
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Price'
+                        },
+                        grid: {
+                            display: true,
+                            color: 'rgba(200, 200, 200, 0.1)',
+                            lineWidth: 1,
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function(context) {
+                                const date = new Date(context[0].parsed.x);
+                                return date.toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit'
+                                });
+                            },
+                            label: function(context) {
+                                const value = context.parsed.y;
+                                return `Price: ${value}`;
+                            }
+                        }
                     }
                 }
             }
+        });
+
+        window.addEventListener('resize', function() {
+            chart.resize();
         });
     }
 
     function updatePriceSpan(price) {
         if (price !== undefined) {
-            document.getElementById('precio').textContent = price.toLocaleString(); // Formatear el precio con separadores de miles
+            document.getElementById('precio').textContent = (price.y).toLocaleString();
         } else {
             document.getElementById('precio').textContent = 'N/A';
         }
     }
 
-    // Initialize with default values
+    function getTimeUnit(timeRange) {
+        switch (timeRange) {
+            case '3d':
+            case '7d':
+            case '14d':
+            case '1m':
+                return 'day';
+            case '3m':
+                return 'month';
+            case 'all':
+                return 'year';
+            default:
+                return 'day';
+        }
+    }
+
     updateFormValues();
 });
+
+//Animaciones
+document.addEventListener('DOMContentLoaded', function () {
+    const originalTitle = document.title;
+    let currentIndex = 0;
+    const interval = 500;
+
+    setInterval(() => {
+        const nextText = originalTitle.slice(currentIndex) + originalTitle.slice(0, currentIndex);
+        document.title = nextText;
+        currentIndex = (currentIndex + 1) % originalTitle.length;
+    }, interval);
+
+    const wowTokenLogo = document.getElementById('wowTokenLogo');
+    const dataToken = document.getElementById('dataToken');
+    const dataTokenWidth = dataToken.offsetWidth;
+    const dataTokenHeight = dataToken.offsetHeight;
+
+    wowTokenLogo.addEventListener('mousemove', function (event) {
+        // Obtener las coordenadas relativas del ratón dentro de wowTokenLogo
+        const x = event.pageX;
+        const y = event.pageY;
+
+        // Ajustar la posición de dataToken para que su esquina inferior izquierda sea el puntero
+        const offsetX = x - dataTokenWidth;
+        const offsetY = y;
+
+        // Ajustar la posición de dataToken
+        dataToken.style.left = `${offsetX}px`;
+        dataToken.style.top = `${offsetY}px`;
+
+        // Mostrar dataToken
+        dataToken.style.display = 'block';
+    });
+
+    wowTokenLogo.addEventListener('mouseout', function () {
+        // Ocultar dataToken cuando el ratón sale de wowTokenLogo
+        dataToken.style.display = 'none';
+    });
+});
+
+
+

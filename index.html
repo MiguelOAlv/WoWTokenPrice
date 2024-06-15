@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seguimiento de Precios de WoW Token</title>
+    <title>WoWTokenPrice</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="images/ficha_wow.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 </head>
 <body>
     <video class="VideoPane-video" src="https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/m1/M1QEYAXEAWPX1699388765299.mp4" data-src="https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/m1/M1QEYAXEAWPX1699388765299.mp4" loop="loop" muted="muted" autoplay="autoplay" playsinline="playsinline"></video>
@@ -17,11 +18,12 @@
     
     <div class="container">
         <div class="titulo_container">           
-            <h1><img src="images/ficha_wow.png" alt="">ACTUAL WOW TOKEN</h1>
-            <h2>Price: <span id="precio"></span> <i class="fa-solid fa-coins" style="color: #FFD43B;"></i></h2>           
+            <h1><img src="images/ficha_wow.png" alt="" id="wowTokenLogo">ACTUAL WOW TOKEN</h1>
+            <img src="images/data_token.png" alt="" id="dataToken">
+            <h2>Price: <span id="precio"></span> <i class="fa-solid fa-coins" style="color: #ffcb3b;"></i></h2>           
         </div>
         <div class="chart-container">
-            <canvas id="tokenChart"></canvas>
+            <canvas id="tokenChart"></canvas>  
         </div>
         <form id="tokenForm">
             <label for="server">Servidor:</label>
