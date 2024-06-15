@@ -304,6 +304,3 @@ document.addEventListener('DOMContentLoaded', function () {
         dataToken.style.display = 'none';
     });
 });
-
-
-
