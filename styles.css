@@ -184,7 +184,6 @@ img {
     z-index: 1000;
     display: none;
 }
-
 @media (max-width: 600px) {
     #loading {
         width: 39vw;
