@@ -21,8 +21,17 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!accessToken) {
             accessToken = await getAccessToken(clientId, clientSecret);
         }
-        
-        fetchTokenData(formValues.server, formValues.gameType, formValues.timeRange, accessToken);
+
+        const load = document.getElementById('loading');
+        load.style.display = 'block';
+        if (chart) {
+            chart.destroy();
+        }
+        try {
+            await fetchTokenData(formValues.server, formValues.gameType, formValues.timeRange, accessToken);
+        } finally {
+            load.style.display = 'none'; 
+        }
     }
 
     async function getAccessToken(clientId, clientSecret) {
@@ -278,7 +287,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const dataTokenHeight = dataToken.offsetHeight;
 
     wowTokenLogo.addEventListener('mousemove', function (event) {
-        // Obtener las coordenadas relativas del ratón dentro de wowTokenLogo
         const x = event.pageX;
         const y = event.pageY;
 
@@ -286,16 +294,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const offsetX = x - dataTokenWidth;
         const offsetY = y;
 
-        // Ajustar la posición de dataToken
         dataToken.style.left = `${offsetX}px`;
         dataToken.style.top = `${offsetY}px`;
 
-        // Mostrar dataToken
         dataToken.style.display = 'block';
     });
 
     wowTokenLogo.addEventListener('mouseout', function () {
-        // Ocultar dataToken cuando el ratón sale de wowTokenLogo
         dataToken.style.display = 'none';
     });
 });
